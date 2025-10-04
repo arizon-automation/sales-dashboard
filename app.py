@@ -50,8 +50,17 @@ class UnleashedAPI:
     
     def _make_request(self, endpoint, params=None):
         """Make authenticated request to Unleashed API"""
-        query_string = f"?{requests.compat.urlencode(params)}" if params else ""
-        full_endpoint = f"{endpoint}{query_string}"
+        # Build query string for URL
+        if params:
+            query_items = []
+            for key, value in sorted(params.items()):
+                query_items.append(f"{key}={value}")
+            query_string = "&".join(query_items)
+            full_endpoint = f"{endpoint}?{query_string}"
+        else:
+            full_endpoint = endpoint
+            
+        # Generate signature
         signature = self._generate_signature(full_endpoint)
         
         headers = {
@@ -260,12 +269,40 @@ def compare_customer_growth(current_orders, previous_orders, limit=10):
 def main():
     st.title("📊 Sales Dashboard")
     
+    # Initialize session state for credentials
+    if 'api_id' not in st.session_state:
+        st.session_state.api_id = ""
+    if 'api_key' not in st.session_state:
+        st.session_state.api_key = ""
+    if 'credentials_saved' not in st.session_state:
+        st.session_state.credentials_saved = False
+    
     # Sidebar - Configuration
     with st.sidebar:
         st.header("⚙️ Configuration")
         
-        api_id = st.text_input("Unleashed API ID", type="password", help="Enter your Unleashed API ID")
-        api_key = st.text_input("Unleashed API Key", type="password", help="Enter your Unleashed API Key")
+        # Show different UI based on whether credentials are saved
+        if not st.session_state.credentials_saved:
+            api_id = st.text_input("Unleashed API ID", value=st.session_state.api_id, type="password", help="Enter your Unleashed API ID")
+            api_key = st.text_input("Unleashed API Key", value=st.session_state.api_key, type="password", help="Enter your Unleashed API Key")
+            
+            if st.button("💾 Save Credentials", use_container_width=True):
+                if api_id and api_key:
+                    st.session_state.api_id = api_id
+                    st.session_state.api_key = api_key
+                    st.session_state.credentials_saved = True
+                    st.success("✅ Credentials saved!")
+                    st.rerun()
+                else:
+                    st.error("Please enter both API ID and Key")
+        else:
+            st.success("✅ Credentials loaded")
+            api_id = st.session_state.api_id
+            api_key = st.session_state.api_key
+            
+            if st.button("🔄 Change Credentials", use_container_width=True):
+                st.session_state.credentials_saved = False
+                st.rerun()
         
         st.divider()
         
@@ -277,8 +314,8 @@ def main():
             st.rerun()
     
     # Check if credentials are provided
-    if not api_id or not api_key:
-        st.warning("⚠️ Please enter your Unleashed API credentials in the sidebar to continue.")
+    if not st.session_state.credentials_saved or not api_id or not api_key:
+        st.warning("⚠️ Please enter your Unleashed API credentials in the sidebar and click 'Save Credentials'.")
         st.info("""
         **How to get your API credentials:**
         1. Log into your Unleashed account
