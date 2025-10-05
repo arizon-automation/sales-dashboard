@@ -70,25 +70,17 @@ st.markdown("""
 
 # Load configuration from secrets
 try:
-    config = {
-        'credentials': st.secrets['credentials'].to_dict(),
-        'cookie': {
-            'name': 'sales_dashboard_auth',
-            'key': 'random_signature_key_123',
-            'expiry_days': 30
-        }
-    }
+    # Initialize authenticator with new API format
+    authenticator = stauth.Authenticate(
+        credentials=st.secrets['credentials'].to_dict(),
+        cookie_name='sales_dashboard_auth',
+        cookie_key='random_signature_key_123',
+        cookie_expiry_days=30
+    )
 except Exception as e:
     st.error("⚠️ Configuration error. Please set up your secrets.toml file correctly.")
+    st.error(f"Error details: {str(e)}")
     st.stop()
-
-# Initialize authenticator
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
 
 # Unleashed API Client
 class UnleashedAPI:
@@ -517,7 +509,7 @@ def main():
         st.header("📅 Period Selection")
         period = st.radio("Select Period", ["Monthly", "Quarterly"])
         
-        if st.button("🔄 Refresh Data", use_container_width=True):
+        if st.button("🔄 Refresh Data", width='stretch'):
             # Clear both in-memory and persistent cache
             st.cache_data.clear()
             # Clear all cache files
@@ -714,7 +706,7 @@ def main():
                 'Change': '${:,.2f}',
                 'Change %': '{:+.1f}%'
             }),
-            use_container_width=True,
+            width='stretch',
             hide_index=True,
             height=400
         )
@@ -730,7 +722,7 @@ def main():
             barmode='group',
             xaxis_tickangle=-45
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
     
     # Customer Growth Analysis
     with st.expander("📊 Customer Revenue Growth Analysis", expanded=True):
@@ -745,7 +737,7 @@ def main():
                 'Change': '${:,.2f}',
                 'Change %': '{:+.1f}%'
             }),
-            use_container_width=True,
+            width='stretch',
             hide_index=True,
             height=400
         )
@@ -760,7 +752,7 @@ def main():
                 'Change': '${:,.2f}',
                 'Change %': '{:+.1f}%'
             }),
-            use_container_width=True,
+            width='stretch',
             hide_index=True,
             height=400
         )
@@ -798,7 +790,7 @@ def main():
                     'Change': '${:,.2f}',
                     'Change %': '{:+.1f}%'
                 }),
-                use_container_width=True,
+                width='stretch',
                 hide_index=True,
                 height=400
             )
@@ -814,7 +806,7 @@ def main():
                 barmode='group',
                 xaxis_tickangle=-45
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("No salesperson data available for the selected period.")
     
@@ -828,7 +820,7 @@ def main():
                 'Change': '${:,.2f}',
                 'Change %': '{:+.1f}%'
             }),
-            use_container_width=True,
+            width='stretch',
             hide_index=True,
             height=400
         )
@@ -844,7 +836,7 @@ def main():
             barmode='group',
             xaxis_tickangle=-45
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
     
     # Footer
     st.divider()
