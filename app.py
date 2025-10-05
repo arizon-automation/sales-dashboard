@@ -74,10 +74,17 @@ st.markdown("""
     .stMetric label {
         color: white !important;
         font-weight: 600;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
     
     .stMetric [data-testid="stMetricValue"] {
         color: white !important;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        font-weight: 700;
+    }
+    
+    .stMetric [data-testid="stMetricDelta"] {
+        color: rgba(255, 255, 255, 0.95) !important;
     }
     
     /* Login page styling */
@@ -86,15 +93,33 @@ st.markdown("""
     }
     
     [data-testid="stSidebar"] .stTextInput > label {
-        color: white;
+        color: white !important;
         font-weight: 600;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
     
     [data-testid="stSidebar"] h1 {
-        color: white;
+        color: white !important;
         font-size: 24px;
         font-weight: 700;
         padding: 20px 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    /* Fix sidebar text colors for better contrast */
+    [data-testid="stSidebar"] * {
+        color: white !important;
+    }
+    
+    [data-testid="stSidebar"] .stAlert {
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        color: #1e293b !important;
+        border-radius: 10px;
+        border: none;
+    }
+    
+    [data-testid="stSidebar"] .stAlert * {
+        color: #1e293b !important;
     }
     
     /* Login button */
