@@ -503,13 +503,6 @@ def main():
     
     st.sidebar.divider()
     
-    # Page selection
-    st.sidebar.header("📑 Navigation")
-    page = st.sidebar.radio(
-        "Select Page",
-        ["📊 Overview", "👥 Customers", "📦 Products", "👤 Salesperson"]
-    )
-    
     # Load Unleashed API credentials from secrets
     try:
         api_id = st.secrets['unleashed']['api_id']
@@ -657,58 +650,57 @@ def main():
     credit_change = current_credit_total - previous_credit_total
     credit_change_percent = (credit_change / previous_credit_total * 100) if previous_credit_total > 0 else 0
     
-    # ============= OVERVIEW PAGE =============
-    if page == "📊 Overview":
-        st.title("📊 Sales Dashboard - Overview")
-        st.info("💡 **Note:** All amounts displayed are GST-exclusive (ex GST)")
-        
-        # Show date ranges being compared
-        st.caption(f"**Current Period:** {current_start} to {current_end} | **Previous Period:** {previous_start} to {previous_end}")
-        
-        # Summary Cards
-        if period == 'Monthly':
-            st.header(f"📈 Summary - Month to Date")
-        else:
-            st.header(f"📈 Summary - Quarter to Date")
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric(
-                "Total Sales",
-                f"${current_sales:,.2f}",
-                f"{sales_change_percent:+.1f}% vs last {period_name.lower()}"
-            )
-        
-        with col2:
-            st.metric(
-                "Orders Completed",
-                len(current_orders),
-                f"{len(current_orders) - len(previous_orders):+d}"
-            )
-        
-        with col3:
-            st.metric(
-                "Credit Notes Issued",
-                f"${current_credit_total:,.2f}",
-                f"{credit_change_percent:+.1f}% vs last {period_name.lower()}"
-            )
-        
-        col4, col5 = st.columns(2)
-        
-        with col4:
-            st.metric(
-                "Average Order Value",
-                f"${current_sales / len(current_orders):,.2f}" if current_orders else "$0",
-                ""
-            )
-        
-        with col5:
-            st.metric(
-                "Revenue Change",
-                f"${abs(sales_change):,.2f}",
-                f"{sales_change_percent:+.1f}% - {'Increase' if sales_change >= 0 else 'Decrease'}"
-            )
+    # ============= DASHBOARD =============
+    st.title("📊 Sales Dashboard")
+    st.info("💡 **Note:** All amounts displayed are GST-exclusive (ex GST)")
+    
+    # Show date ranges being compared
+    st.caption(f"**Current Period:** {current_start} to {current_end} | **Previous Period:** {previous_start} to {previous_end}")
+    
+    # Summary Cards
+    if period == 'Monthly':
+        st.header(f"📈 Summary - Month to Date")
+    else:
+        st.header(f"📈 Summary - Quarter to Date")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "Total Sales",
+            f"${current_sales:,.2f}",
+            f"{sales_change_percent:+.1f}% vs last {period_name.lower()}"
+        )
+    
+    with col2:
+        st.metric(
+            "Orders Completed",
+            len(current_orders),
+            f"{len(current_orders) - len(previous_orders):+d}"
+        )
+    
+    with col3:
+        st.metric(
+            "Credit Notes Issued",
+            f"${current_credit_total:,.2f}",
+            f"{credit_change_percent:+.1f}% vs last {period_name.lower()}"
+        )
+    
+    col4, col5 = st.columns(2)
+    
+    with col4:
+        st.metric(
+            "Average Order Value",
+            f"${current_sales / len(current_orders):,.2f}" if current_orders else "$0",
+            ""
+        )
+    
+    with col5:
+        st.metric(
+            "Revenue Change",
+            f"${abs(sales_change):,.2f}",
+            f"{sales_change_percent:+.1f}% - {'Increase' if sales_change >= 0 else 'Decrease'}"
+        )
     
     st.divider()
     

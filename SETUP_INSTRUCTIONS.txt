@@ -1,0 +1,62 @@
+SALES DASHBOARD SETUP INSTRUCTIONS
+===================================
+
+STEP 1: Configure Unleashed API Credentials
+--------------------------------------------
+1. Open the file: .streamlit/secrets.toml
+2. Replace YOUR_API_ID_HERE with your actual Unleashed API ID
+3. Replace YOUR_API_KEY_HERE with your actual Unleashed API Key
+4. Save the file
+
+STEP 2: Generate Password Hashes for Team Members
+--------------------------------------------------
+1. Run: python generate_password.py
+2. Enter a password when prompted
+3. Copy the generated hash
+4. Add user to .streamlit/secrets.toml like this:
+
+[credentials.usernames.username_here]
+email = "user@arizon.com"
+name = "User Name"
+password = "PASTE_HASH_HERE"
+
+STEP 3: Run the Dashboard
+--------------------------
+1. Run: streamlit run app.py
+2. Open browser to http://localhost:8501
+3. Login with username and password
+4. View the dashboard!
+
+EXAMPLE USER SETUP
+------------------
+Let's say you want to add user "john" with password "Welcome123":
+
+1. Run: python generate_password.py
+2. Enter: Welcome123
+3. Copy the hash (something like: $2b$12$abc123...)
+4. Edit .streamlit/secrets.toml and add:
+
+[credentials.usernames.john]
+email = "john@arizon.com"
+name = "John Doe"
+password = "$2b$12$abc123..."
+
+5. Save the file
+6. John can now login with:
+   Username: john
+   Password: Welcome123
+
+SECURITY NOTES
+--------------
+- Never commit .streamlit/secrets.toml to GitHub (it contains sensitive data)
+- The API credentials are only accessible by you
+- Team members only see the dashboard, not the API credentials
+- Passwords are securely hashed using bcrypt
+
+TROUBLESHOOTING
+---------------
+If authentication doesn't work:
+- Make sure you copied the ENTIRE hash including $2b$12$...
+- Check that the username in login matches the one in secrets.toml
+- Restart the Streamlit app after changing secrets.toml
+

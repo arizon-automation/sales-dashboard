@@ -1,17 +1,19 @@
-# Python
+# Streamlit secrets - NEVER commit this!
+.streamlit/secrets.toml
+
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
+
+# Virtual environments
 venv/
+env/
 ENV/
 
-# Streamlit
-.streamlit/secrets.toml
-
-# Cache
+# Cache directory
 .cache/
 *.pkl
 
@@ -20,14 +22,11 @@ ENV/
 .idea/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Backup files
-*_backup.py
-app_backup.py
-test_api.py
-SETUP_INSTRUCTIONS.txt
-generate_password.py
+# Logs
+*.log
