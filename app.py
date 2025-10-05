@@ -57,102 +57,13 @@ def save_to_cache(cache_key, data):
 # Custom CSS
 st.markdown("""
     <style>
-    /* Main container */
     .main {
         padding: 0rem 1rem;
     }
-    
-    /* Metrics styling */
     .stMetric {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .stMetric label {
-        color: white !important;
-        font-weight: 600;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-    
-    .stMetric [data-testid="stMetricValue"] {
-        color: white !important;
-        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        font-weight: 700;
-    }
-    
-    .stMetric [data-testid="stMetricDelta"] {
-        color: rgba(255, 255, 255, 0.95) !important;
-    }
-    
-    /* Login page styling */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-    }
-    
-    [data-testid="stSidebar"] .stTextInput > label {
-        color: white !important;
-        font-weight: 600;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-    
-    [data-testid="stSidebar"] h1 {
-        color: white !important;
-        font-size: 24px;
-        font-weight: 700;
-        padding: 20px 0;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    /* Fix sidebar text colors for better contrast */
-    [data-testid="stSidebar"] * {
-        color: white !important;
-    }
-    
-    [data-testid="stSidebar"] .stAlert {
-        background-color: rgba(255, 255, 255, 0.95) !important;
-        color: #1e293b !important;
-        border-radius: 10px;
-        border: none;
-    }
-    
-    [data-testid="stSidebar"] .stAlert * {
-        color: #1e293b !important;
-    }
-    
-    /* Login button */
-    [data-testid="stSidebar"] button[kind="primary"] {
-        background: white;
-        color: #667eea;
-        font-weight: 600;
-        border-radius: 10px;
-        border: none;
-        padding: 10px 20px;
-        width: 100%;
-    }
-    
-    [data-testid="stSidebar"] button[kind="primary"]:hover {
-        background: #f0f2f6;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    
-    /* Main dashboard title */
-    h1 {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-weight: 800;
-    }
-    
-    /* Expander headers */
-    .streamlit-expanderHeader {
         background-color: #f0f2f6;
+        padding: 15px;
         border-radius: 10px;
-        font-weight: 600;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -568,46 +479,14 @@ def main():
     
     if authentication_status == False:
         st.sidebar.error('Username/password is incorrect')
-        # Welcome screen with error
-        st.markdown("""
-            <div style='text-align: center; padding: 50px 0;'>
-                <h1 style='font-size: 3.5em; margin-bottom: 20px;'>📊</h1>
-                <h1 style='font-size: 2.5em; margin-bottom: 10px;'>Arizon Sales Dashboard</h1>
-                <p style='font-size: 1.2em; color: #666; margin-bottom: 30px;'>Real-time sales analytics and insights</p>
-                <div style='background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%); 
-                            color: white; 
-                            padding: 30px; 
-                            border-radius: 15px; 
-                            max-width: 600px; 
-                            margin: 0 auto;
-                            box-shadow: 0 10px 25px rgba(0,0,0,0.1);'>
-                    <h3 style='color: white; margin-bottom: 15px;'>❌ Authentication Failed</h3>
-                    <p style='color: white;'>Please check your username and password and try again.</p>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+        st.title("📊 Arizon Sales Dashboard")
+        st.info("Please login using the sidebar to access the dashboard.")
         return
     
     if authentication_status == None:
         st.sidebar.warning('Please enter your username and password')
-        # Welcome screen with branding
-        st.markdown("""
-            <div style='text-align: center; padding: 50px 0;'>
-                <h1 style='font-size: 3.5em; margin-bottom: 20px;'>📊</h1>
-                <h1 style='font-size: 2.5em; margin-bottom: 10px;'>Arizon Sales Dashboard</h1>
-                <p style='font-size: 1.2em; color: #666; margin-bottom: 30px;'>Real-time sales analytics and insights</p>
-                <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                            color: white; 
-                            padding: 30px; 
-                            border-radius: 15px; 
-                            max-width: 600px; 
-                            margin: 0 auto;
-                            box-shadow: 0 10px 25px rgba(0,0,0,0.1);'>
-                    <h3 style='color: white; margin-bottom: 15px;'>👈 Please Login</h3>
-                    <p style='color: white;'>Use the sidebar to enter your credentials and access the dashboard.</p>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+        st.title("📊 Arizon Sales Dashboard")
+        st.info("Please login using the sidebar to access the dashboard.")
         return
     
     # User is authenticated
