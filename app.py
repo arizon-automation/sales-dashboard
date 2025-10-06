@@ -6,6 +6,7 @@ import hashlib
 import base64
 import pandas as pd
 from datetime import datetime, timedelta
+import pytz
 import plotly.express as px
 import plotly.graph_objects as go
 import yaml
@@ -13,6 +14,9 @@ from yaml.loader import SafeLoader
 import pickle
 import os
 from pathlib import Path
+
+# Melbourne timezone
+MELBOURNE_TZ = pytz.timezone('Australia/Melbourne')
 
 # Page config
 st.set_page_config(
@@ -30,13 +34,19 @@ def get_cache_file(cache_key):
     """Get cache file path for a given key"""
     return CACHE_DIR / f"{cache_key}.pkl"
 
-def load_from_cache(cache_key, max_age_hours=2):
+def load_from_cache(cache_key, max_age_hours=0.5):
     """Load data from persistent cache if available and not expired"""
+    # Skip cache if force_refresh flag is set
+    if st.session_state.get('force_refresh', False):
+        return None
+    
     cache_file = get_cache_file(cache_key)
     
     if cache_file.exists():
-        # Check if cache is still valid
-        file_age = datetime.now() - datetime.fromtimestamp(cache_file.stat().st_mtime)
+        # Check if cache is still valid (using Melbourne time)
+        now_melbourne = datetime.now(MELBOURNE_TZ)
+        file_modified = datetime.fromtimestamp(cache_file.stat().st_mtime, tz=MELBOURNE_TZ)
+        file_age = now_melbourne - file_modified
         if file_age.total_seconds() < max_age_hours * 3600:
             try:
                 with open(cache_file, 'rb') as f:
@@ -510,6 +520,8 @@ def main():
         period = st.radio("Select Period", ["Monthly", "Quarterly"])
         
         if st.button("🔄 Refresh Data", width='stretch'):
+            # Set force refresh flag
+            st.session_state.force_refresh = True
             # Clear both in-memory and persistent cache
             st.cache_data.clear()
             # Clear all cache files
@@ -523,12 +535,13 @@ def main():
     # Initialize API client
     api = UnleashedAPI(api_id, api_key)
     
-    # Calculate date ranges
-    today = datetime.now()
+    # Calculate date ranges using Melbourne timezone
+    today = datetime.now(MELBOURNE_TZ)
     
     if period == "Monthly":
         current_start = today.replace(day=1).strftime('%Y-%m-%d')
-        current_end = today.strftime('%Y-%m-%d')
+        # Include full day today by using end of day
+        current_end = (today + timedelta(days=1)).strftime('%Y-%m-%d')
         
         previous_month = today.replace(day=1) - timedelta(days=1)
         previous_start = previous_month.replace(day=1).strftime('%Y-%m-%d')
@@ -545,11 +558,12 @@ def main():
         quarter = (today.month - 1) // 3
         # Quarter start months: Q1=1, Q2=4, Q3=7, Q4=10
         quarter_start_month = quarter * 3 + 1
-        current_start = datetime(today.year, quarter_start_month, 1).strftime('%Y-%m-%d')
-        current_end = today.strftime('%Y-%m-%d')
+        current_start = datetime(today.year, quarter_start_month, 1, tzinfo=MELBOURNE_TZ).strftime('%Y-%m-%d')
+        # Include full day today by using end of day
+        current_end = (today + timedelta(days=1)).strftime('%Y-%m-%d')
         
         # Calculate how many days into the quarter we are
-        quarter_start_date = datetime(today.year, quarter_start_month, 1)
+        quarter_start_date = datetime(today.year, quarter_start_month, 1, tzinfo=MELBOURNE_TZ)
         days_into_quarter = (today - quarter_start_date).days
         
         # Previous quarter
@@ -562,18 +576,18 @@ def main():
         
         # Previous quarter start
         prev_quarter_start_month = prev_quarter * 3 + 1
-        previous_start = datetime(prev_year, prev_quarter_start_month, 1).strftime('%Y-%m-%d')
+        previous_start = datetime(prev_year, prev_quarter_start_month, 1, tzinfo=MELBOURNE_TZ).strftime('%Y-%m-%d')
         
         # Previous quarter end: same number of days into that quarter as we are now
-        prev_quarter_start_date = datetime(prev_year, prev_quarter_start_month, 1)
-        previous_end_date = prev_quarter_start_date + timedelta(days=days_into_quarter)
+        prev_quarter_start_date = datetime(prev_year, prev_quarter_start_month, 1, tzinfo=MELBOURNE_TZ)
+        previous_end_date = prev_quarter_start_date + timedelta(days=days_into_quarter + 1)
         previous_end = previous_end_date.strftime('%Y-%m-%d')
         
         period_name = "Quarter"
     
-    # Store fetch time in session state
+    # Store fetch time in session state (Melbourne time)
     if 'last_fetch_time' not in st.session_state:
-        st.session_state.last_fetch_time = datetime.now()
+        st.session_state.last_fetch_time = datetime.now(MELBOURNE_TZ)
     
     # Excluded customers
     EXCLUDED_CUSTOMERS = ['Virtugroup', 'Fengrong']
@@ -581,7 +595,7 @@ def main():
     # Fetch data with loading spinner
     try:
         with st.spinner("📥 Loading data..."):
-            fetch_start = datetime.now()
+            fetch_start = datetime.now(MELBOURNE_TZ)
             all_current_orders = api.get_sales_orders(current_start, current_end)
             all_previous_orders = api.get_sales_orders(previous_start, previous_end)
             products = api.get_products()
@@ -606,14 +620,18 @@ def main():
                 if note.get('Customer', {}).get('CustomerCode') not in EXCLUDED_CUSTOMERS
             ]
             
-            fetch_duration = (datetime.now() - fetch_start).total_seconds()
+            fetch_duration = (datetime.now(MELBOURNE_TZ) - fetch_start).total_seconds()
             
             # Update fetch time only if it took more than 0.5 seconds (indicating actual API call)
             if fetch_duration > 0.5:
-                st.session_state.last_fetch_time = datetime.now()
+                st.session_state.last_fetch_time = datetime.now(MELBOURNE_TZ)
+            
+            # Reset force refresh flag after successful fetch
+            if st.session_state.get('force_refresh', False):
+                st.session_state.force_refresh = False
         
-        # Show data status with fetch time info
-        time_since_fetch = datetime.now() - st.session_state.last_fetch_time
+        # Show data status with fetch time info (Melbourne time)
+        time_since_fetch = datetime.now(MELBOURNE_TZ) - st.session_state.last_fetch_time
         minutes_ago = int(time_since_fetch.total_seconds() / 60)
         
         if minutes_ago == 0:
@@ -644,7 +662,8 @@ def main():
     
     # ============= DASHBOARD =============
     st.title("📊 Arizon Sales Dashboard")
-    st.info("💡 **Note:** All amounts displayed are GST-exclusive (ex GST)")
+    current_melbourne_time = datetime.now(MELBOURNE_TZ).strftime('%A, %d %B %Y %I:%M %p AEST/AEDT')
+    st.info(f"💡 **Note:** All amounts displayed are GST-exclusive (ex GST) | 🕒 Melbourne Time: {current_melbourne_time}")
     
     # Show date ranges being compared
     st.caption(f"**Current Period:** {current_start} to {current_end} | **Previous Period:** {previous_start} to {previous_end}")
@@ -840,7 +859,7 @@ def main():
     
     # Footer
     st.divider()
-    st.caption("💡 **Tip:** Data is cached for 2 hours. Use the '🔄 Refresh Data' button in the sidebar to force a refresh.")
+    st.caption("💡 **Tip:** Data is cached for 30 minutes for performance. Click '🔄 Refresh Data' in the sidebar to fetch the latest data from Unleashed immediately.")
 
 
 if __name__ == "__main__":
